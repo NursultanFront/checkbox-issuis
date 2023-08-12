@@ -1,9 +1,8 @@
 <template>
   <div class="block">
-    <h3 class="block__title">И привлеките больше гостей 🎁</h3>
-    <p class="block__text">Предложите скидки своим гостям.Так бронировать будут чаще и быстрее</p>
+    <h2>Мой вариант</h2>
     <ul class="block__discount discount">
-      <li v-for="item in discountTypes" :key="item.value">
+      <li v-for="item in discountTypesMy" :key="item.value">
         <UiCheckbox
           :id="item.id"
           v-model="item.isChecked"
@@ -13,8 +12,30 @@
       </li>
       <li class="discount__custom">
         <div class="discount__content">
-          <UiCheckbox id="custom" v-model="isCustomCheck" name="discount" />
-          <span class="discount__text">Свой вариант:</span>
+          <UiCheckbox id="custom" v-model="isCustomCheck" name="discount" label="Свой вариант" />
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="block">
+    <h2>Твой вариант</h2>
+    <ul class="block__discount discount">
+      <li v-for="item in discountTypesYours" :key="item.value">
+        <YourCheckbox
+          :id="item.id"
+          v-model="item.isChecked"
+          name="discount"
+          :label="item.labelText"
+        />
+      </li>
+      <li class="discount__custom">
+        <div class="discount__content">
+          <YourCheckbox
+            id="customYours"
+            v-model="isCustmomYours"
+            name="discount"
+            label="Свой вариант"
+          />
         </div>
       </li>
     </ul>
@@ -24,6 +45,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import UiCheckbox from '@/components/TheCheckbox.vue'
+import YourCheckbox from '@/components/UiCheckbox.vue'
 
 export type Price = {
   price: number
@@ -41,7 +63,7 @@ enum DiscountTypeId {
 
 const isCustomCheck = ref(false)
 
-const discountTypes = ref([
+const discountTypesMy = ref([
   {
     id: 'five',
     isChecked: false,
@@ -62,33 +84,69 @@ const discountTypes = ref([
   }
 ])
 
-const resetDiscount = () => {
-  for (const item of discountTypes.value) {
-    item.isChecked = false
+watch(isCustomCheck, (newVal) => {
+  if (newVal) {
+    discountTypesMy.value.forEach((item) => {
+      item.isChecked = false
+    })
   }
-}
-
-const resetCustom = () => {
-  isCustomCheck.value = false
-}
+})
 
 watch(
-  () => discountTypes.value,
+  discountTypesMy,
   (newVal) => {
-    newVal.forEach((_) => {
-      resetCustom()
-    })
+    for (const item of newVal) {
+      if (item.isChecked) {
+        isCustomCheck.value = false
+        break
+      }
+    }
   },
   { deep: true }
 )
 
-watch(
-  () => isCustomCheck.value,
-  () => {
-    if (isCustomCheck.value === true) {
-      resetDiscount()
-    }
+const isCustmomYours = ref<boolean>(false)
+
+const discountTypesYours = ref([
+  {
+    id: 'fiveYours',
+    isChecked: false,
+    value: 5,
+    labelText: 'Скидка 5% первым трем гостям'
+  },
+  {
+    id: 'tenYours',
+    isChecked: false,
+    value: 10,
+    labelText: 'Скидка 10% от 7 дней бронирования'
+  },
+  {
+    id: 'thirtyYours',
+    isChecked: false,
+    value: 30,
+    labelText: 'Скидка 30% от 30 дней бронирования'
   }
+])
+
+watch(isCustmomYours, (newVal) => {
+  if (newVal) {
+    discountTypesYours.value.forEach((item) => {
+      item.isChecked = false
+    })
+  }
+})
+
+watch(
+  discountTypesYours,
+  (newVal) => {
+    for (const item of newVal) {
+      if (item.isChecked) {
+        isCustomCheck.value = false
+        break
+      }
+    }
+  },
+  { deep: true }
 )
 </script>
 

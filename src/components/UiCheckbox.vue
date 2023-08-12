@@ -13,19 +13,20 @@
       </span>
       <input
         :id="id"
-        v-model="isChecked"
         ref="checkboxInputRef"
         class="checkbox__input"
         :name="name"
         type="checkbox"
+        :value="modelValue"
         :disabled="disabled"
+        @change="onChange"
       />
     </label>
   </div>
 </template>
 <script setup lang="ts">
 import IconCheck from './icons/IconCheck.vue'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 interface IProps {
   id: string
@@ -42,10 +43,12 @@ const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
 
-const isChecked = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
-})
+const onChange = (event: Event) => {
+  const element = event.target as HTMLInputElement
+  const isChecked = element.checked
+
+  emit('update:modelValue', isChecked)
+}
 
 const onToggle = () => checkboxInputRef.value?.click()
 </script>
